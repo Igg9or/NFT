@@ -1,0 +1,629 @@
+﻿
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\migrations\env.py
+================================================================================
+
+
+import logging
+from logging.config import fileConfig
+
+from flask import current_app
+
+from alembic import context
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+fileConfig(config.config_file_name)
+logger = logging.getLogger('alembic.env')
+
+
+def get_engine():
+    try:
+        # this works with Flask-SQLAlchemy<3 and Alchemical
+        return current_app.extensions['migrate'].db.get_engine()
+    except (TypeError, AttributeError):
+        # this works with Flask-SQLAlchemy>=3
+        return current_app.extensions['migrate'].db.engine
+
+
+def get_engine_url():
+    try:
+        return get_engine().url.render_as_string(hide_password=False).replace(
+            '%', '%%')
+    except AttributeError:
+        return str(get_engine().url).replace('%', '%%')
+
+
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+config.set_main_option('sqlalchemy.url', get_engine_url())
+target_db = current_app.extensions['migrate'].db
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+
+def get_metadata():
+    if hasattr(target_db, 'metadatas'):
+        return target_db.metadatas[None]
+    return target_db.metadata
+
+
+def run_migrations_offline():
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url, target_metadata=get_metadata(), literal_binds=True
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online():
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+
+    # this callback is used to prevent an auto-migration from being generated
+    # when there are no changes to the schema
+    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
+    def process_revision_directives(context, revision, directives):
+        if getattr(config.cmd_opts, 'autogenerate', False):
+            script = directives[0]
+            if script.upgrade_ops.is_empty():
+                directives[:] = []
+                logger.info('No changes in schema detected.')
+
+    conf_args = current_app.extensions['migrate'].configure_args
+    if conf_args.get("process_revision_directives") is None:
+        conf_args["process_revision_directives"] = process_revision_directives
+
+    connectable = get_engine()
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=get_metadata(),
+            **conf_args
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\auth\login.html
+================================================================================
+
+
+{% extends "layouts/base.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Вход в систему</h2>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\auth\register.html
+================================================================================
+
+
+{% extends "layouts/base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Регистрация</h2>
+                <form method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="student">Ученик</option>
+                            <option value="teacher">Учитель</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="class_grade" class="form-label">Класс</label>
+                        <input type="text" class="form-control" id="class_grade" name="class_grade">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                </form>
+                <div class="mt-3 text-center">
+                    <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войдите</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\dashboard\dashboard.html
+================================================================================
+
+
+{% extends "layouts/base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" 
+                     class="profile-avatar mb-3">
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted">{{ user.role|capitalize }} • {{ user.class_grade }}</p>
+                <div class="d-flex justify-content-between mt-3">
+                    <div class="text-center">
+                        <h5>{{ user.nfts|length }}</h5>
+                        <small>NFT</small>
+                    </div>
+                    <div class="text-center">
+                        <h5>#{{ user_rank }}</h5>
+                        <small>Рейтинг</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Последние достижения</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_nfts %}
+                    <div class="row">
+                        {% for nft in recent_nfts %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card nft-card rarity-{{ nft.rarity }}">
+                                <div class="nft-img-container">
+                                    <img src="{{ url_for('static', filename=nft.image_url) }}" 
+                                         class="nft-img" alt="{{ nft.title }}">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ nft.title }}</h5>
+                                    <p class="card-text text-muted small">{{ nft.description|truncate(50) }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-{{ 
+                                            'secondary' if nft.rarity == 'common' 
+                                            else 'primary' if nft.rarity == 'rare' 
+                                            else 'danger' 
+                                        }}">
+                                            {{ nft.rarity|capitalize }}
+                                        </span>
+                                        <small class="text-muted">{{ nft.date_created.strftime('%d.%m.%Y') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Пока нет достижений</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\dashboard\index.html
+================================================================================
+
+
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="text-center mb-4">🏆 Последние достижения школы</h1>
+  
+  <div class="row">
+    <!-- Карточка NFT -->
+    <div class="col-md-4 mb-4">
+      <div class="card card-glass p-3">
+        <img src="/static/img/nft-sample.png" class="card-img-top">
+        <div class="card-body">
+          <h5 class="text-neon">Лучший математик</h5>
+          <p>Иван Петров (9-Б) получил эту награду за победу в олимпиаде.</p>
+          <span class="badge bg-purple">Редкий</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html
+================================================================================
+
+
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html\base.html
+================================================================================
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School NFT Platform - {% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'layouts/navbar.html' %}
+    
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html\navbar.html
+================================================================================
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">SchoolNFT</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Главная</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('my_nfts') }}">Мои NFT</a>
+                </li>
+                {% if session.get('role') in ['teacher', 'admin'] %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('create_nft') }}">Создать NFT</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('ratings') }}">Рейтинги</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if 'user_id' in session %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> {{ session['username'] }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Профиль</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Вход</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('register') }}">Регистрация</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\app.py
+================================================================================
+
+
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import os
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///school_nft.db'
+app.config['SECRET_KEY'] = 'your-secret-key-123'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='student')
+    class_grade = db.Column(db.String(10))
+    profile_pic = db.Column(db.String(200), default='default.png')
+
+class NFT(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(200), nullable=False)
+    rarity = db.Column(db.String(20), nullable=False, default='common')
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    owner = db.relationship('User', backref='nfts')
+
+# Создаем папки при первом запуске
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+with app.app_context():
+    db.drop_all()  # Удаляем все таблицы
+    db.create_all()  # Создаем заново с новой структурой
+    
+    # Создаем администратора
+    if not User.query.filter_by(username='admin').first():
+        admin = User(
+            username='admin',
+            password=generate_password_hash('admin123'),
+            role='admin',
+            class_grade='staff',
+            profile_pic='default.png'
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+# Регистрация
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+        role = request.form['role']
+        class_grade = request.form.get('class_grade', '')
+        
+        if User.query.filter_by(username=username).first():
+            flash('Пользователь уже существует', 'danger')
+            return redirect(url_for('register'))
+        
+        new_user = User(
+            username=username,
+            password=password,
+            role=role,
+            class_grade=class_grade
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        
+        flash('Регистрация успешна!', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('auth/register.html')
+
+# Вход
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['role'] = user.role
+            return redirect(url_for('dashboard'))
+        
+        flash('Неверные учетные данные', 'danger')
+    
+    return render_template('auth/login.html')
+
+# Выход
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+# Главная страница
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    recent_nfts = NFT.query.order_by(NFT.date_created.desc()).limit(5).all()
+    
+    return render_template('dashboard/dashboard.html', 
+                         user=user,
+                         recent_nfts=recent_nfts)
+
+# Создание NFT
+@app.route('/create-nft', methods=['GET', 'POST'])
+def create_nft():
+    if 'user_id' not in session or session['role'] not in ['teacher', 'admin']:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        rarity = request.form['rarity']
+        owner_id = request.form['owner_id']
+        
+        # Обработка загрузки изображения
+        if 'image' in request.files:
+            image = request.files['image']
+            if image.filename != '':
+                filename = f"{datetime.now().timestamp()}.{image.filename.split('.')[-1]}"
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_url = f"uploads/{filename}"
+                
+                new_nft = NFT(
+                    title=title,
+                    description=description,
+                    image_url=image_url,
+                    rarity=rarity,
+                    owner_id=owner_id
+                )
+                db.session.add(new_nft)
+                db.session.commit()
+                
+                flash('NFT успешно создан!', 'success')
+                return redirect(url_for('my_nfts'))
+    
+    students = User.query.filter_by(role='student').all()
+    return render_template('dashboard/create_nft.html', students=students)
+
+# Мои NFT
+@app.route('/my-nfts')
+def my_nfts():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.query.get(session['user_id'])
+    return render_template('dashboard/my_nfts.html', user=user)
+
+# Рейтинги
+@app.route('/ratings')
+def ratings():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Топ пользователей по количеству NFT
+    top_users = db.session.query(
+        User.username,
+        User.class_grade,
+        db.func.count(NFT.id).label('nft_count')
+    ).join(NFT).group_by(User.id).order_by(db.desc('nft_count')).limit(10).all()
+    
+    # Топ классов
+    top_classes = db.session.query(
+        User.class_grade,
+        db.func.count(NFT.id).label('nft_count')
+    ).join(NFT).group_by(User.class_grade).order_by(db.desc('nft_count')).all()
+    
+    return render_template('dashboard/ratings.html', 
+                         top_users=top_users,
+                         top_classes=top_classes)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+================================================================================
+Файл: C:\Users\yatma\Desktop\NFT\models.py
+================================================================================
+
+
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    password = db.Column(db.String(200))
+    role = db.Column(db.String(20))  # "student", "teacher", "admin"
+    class_grade = db.Column(db.String(10))  # "10-A"
+    profile_pic = db.Column(db.String(200))  # Ссылка на аватар
+
+class NFT(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    image_url = db.Column(db.String(200))
+    rarity = db.Column(db.String(20))  # "common", "rare", "legendary"
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    date_created = db.Column(db.DateTime)

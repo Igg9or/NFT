@@ -1,0 +1,68 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow">
+            <div class="card-body text-center">
+                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" 
+                     class="profile-avatar mb-3">
+                <h4>{{ user.username }}</h4>
+                <p class="text-muted">{{ user.role|capitalize }} • {{ user.class_grade }}</p>
+                <div class="d-flex justify-content-between mt-3">
+                    <div class="text-center">
+                        <h5>{{ user.nfts|length }}</h5>
+                        <small>NFT</small>
+                    </div>
+                    <div class="text-center">
+                        <h5>#{{ user_rank }}</h5>
+                        <small>Рейтинг</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Последние достижения</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_nfts %}
+                    <div class="row">
+                        {% for nft in recent_nfts %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card nft-card rarity-{{ nft.rarity }}">
+                                <div class="nft-img-container">
+                                    <img src="{{ url_for('static', filename=nft.image_url) }}" 
+                                         class="nft-img" alt="{{ nft.title }}">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ nft.title }}</h5>
+                                    <p class="card-text text-muted small">{{ nft.description|truncate(50) }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-{{ 
+                                            'secondary' if nft.rarity == 'common' 
+                                            else 'primary' if nft.rarity == 'rare' 
+                                            else 'danger' 
+                                        }}">
+                                            {{ nft.rarity|capitalize }}
+                                        </span>
+                                        <small class="text-muted">{{ nft.date_created.strftime('%d.%m.%Y') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Пока нет достижений</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

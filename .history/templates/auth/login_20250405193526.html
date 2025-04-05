@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card card-glass mx-auto" style="max-width: 400px;">
+        <div class="card-body">
+            <h2 class="text-center mb-4">Вход в систему</h2>
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-3">
+                    <input type="text" class="form-control" name="username" placeholder="Логин" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" name="password" placeholder="Пароль" required>
+                </div>
+                <button type="submit" class="btn btn-neon w-100">Войти</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
