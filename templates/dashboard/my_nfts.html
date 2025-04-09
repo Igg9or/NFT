@@ -1,0 +1,195 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{% if user.role == 'admin' %}Все достижения{% else %}Мои достижения{% endif %} (NFT){% endblock %}
+
+{% block extra_css %}
+<style>
+    .nft-img-container {
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .model-preview {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f0f0f0;
+    }
+    
+    .model-preview-icon {
+        max-width: 80px;
+        opacity: 0.7;
+    }
+    
+    #model-viewer-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.95);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    #model-viewer {
+        width: 90%;
+        height: 80%;
+    }
+    
+    .close-viewer {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 40px;
+        cursor: pointer;
+        z-index: 10001;
+    }
+    
+    .viewer-controls {
+        color: white;
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .viewer-instruction {
+        color: rgba(255,255,255,0.7);
+        font-size: 14px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4">
+        {% if user.role == 'admin' %}Все достижения{% else %}Мои достижения{% endif %} (NFT)
+    </h1>
+    
+    <div class="row">
+        {% if nfts %}
+            {% for nft in nfts %}
+            <div class="col-md-4 mb-4">
+                <div class="card nft-card rarity-{{ nft.rarity }}">
+                    {% if nft.media_type == '3d_model' %}
+                    <div class="nft-img-container" onclick="show3DModel('{{ url_for('static', filename=nft.media_url) }}')">
+                        <div class="model-preview">
+                            <img src="{{ url_for('static', filename='images/3d-icon.png') }}" 
+                                 class="model-preview-icon" 
+                                 alt="3D модель"
+                                 title="Кликните для просмотра в 3D">
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="nft-img-container">
+                        <img src="{{ url_for('static', filename=nft.media_url) }}" 
+                             class="nft-img" 
+                             alt="{{ nft.title }}"
+                             style="object-fit: contain;">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ nft.title }}</h5>
+                        <p class="card-text text-muted small">{{ nft.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-{{ 
+                                'secondary' if nft.rarity == 'common' 
+                                else 'primary' if nft.rarity == 'rare' 
+                                else 'danger' 
+                            }}">
+                                {{ nft.rarity|capitalize }}
+                            </span>
+                            <small class="text-muted">
+                                {{ nft.date_created.strftime('%d.%m.%Y') }}
+                                {% if user.role == 'admin' %}
+                                <br>Владелец: {{ nft.owner.username }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-muted">
+                            {% if user.role == 'admin' %}Нет созданных достижений{% else %}У вас пока нет достижений{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 3D Viewer Modal -->
+<div id="model-viewer-container">
+    <span class="close-viewer" onclick="closeViewer()">&times;</span>
+    <model-viewer 
+        id="model-viewer" 
+        auto-rotate 
+        camera-controls 
+        ar 
+        shadow-intensity="1"
+        exposure="1"
+        environment-image="neutral"
+        style="width: 100%; height: 100%;">
+        
+        <div class="viewer-controls">
+            <button class="btn btn-sm btn-outline-light me-2" onclick="document.getElementById('model-viewer').cameraOrbit = '0deg 75deg 105%'">
+                <i class="bi bi-arrow-repeat"></i> Сбросить вид
+            </button>
+        </div>
+        <div class="viewer-instruction">
+            Используйте мышь для вращения модели. Колесико для масштабирования.
+        </div>
+    </model-viewer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Model Viewer from Google -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script>
+    function show3DModel(modelUrl) {
+        const viewer = document.getElementById('model-viewer');
+        viewer.src = modelUrl;
+        document.getElementById('model-viewer-container').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Disable scrolling
+    }
+    
+    function closeViewer() {
+        document.getElementById('model-viewer-container').style.display = 'none';
+        document.body.style.overflow = ''; // Enable scrolling
+    }
+    
+    // Close when clicking outside the model
+    document.getElementById('model-viewer-container').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeViewer();
+        }
+    });
+    
+    // Close with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeViewer();
+        }
+    });
+</script>
+{% endblock %}

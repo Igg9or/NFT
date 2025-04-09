@@ -35,11 +35,11 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="image" class="form-label">Изображение</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
-                        <div class="mt-2">
-                            <img id="image-preview" src="#" alt="Превью изображения" style="max-height: 200px; display: none;">
-                        </div>
+                        <label for="media" class="form-label">3D-модель или изображение</label>
+                        <input type="file" class="form-control" id="media" name="media" accept="image/*,.glb,.gltf,.obj">
+                        <small class="text-muted">Поддерживаются: GLB, GLTF, OBJ (3D) или JPG/PNG (2D)</small>
+                        <div id="preview-container" style="width: 100%; height: 300px; display: none;"></div>
+                        <img id="image-preview" src="#" style="max-height: 200px; display: none;">
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Создать NFT</button>
                 </form>

@@ -1,7 +1,9 @@
 ﻿
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\migrations\env.py
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\migrations\env.py
+РАЗМЕР: 3344 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 23:47:35
 ================================================================================
 
 
@@ -120,8 +122,205 @@ else:
     run_migrations_online()
 
 
+
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\auth\login.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\static\css\style.css
+РАЗМЕР: 1630 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:44:39
+================================================================================
+
+
+:root {
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --dark-color: #2d3436;
+    --light-color: #f5f6fa;
+    --success-color: #00b894;
+    --danger-color: #d63031;
+    --warning-color: #fdcb6e;
+}
+
+body {
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+}
+
+.nft-card {
+    transition: transform 0.3s;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nft-card:hover {
+    transform: translateY(-5px);
+}
+
+.nft-img-container {
+    height: 200px;
+    overflow: hidden;
+}
+
+.nft-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rarity-common {
+    border-left: 4px solid #636e72;
+}
+
+.rarity-rare {
+    border-left: 4px solid #0984e3;
+}
+
+.rarity-legendary {
+    border-left: 4px solid #e84393;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rating-card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rating-badge {
+    font-size: 1rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .nft-img-container {
+        height: 150px;
+    }
+}
+
+
+================================================================================
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\static\js\3d-viewer.js
+РАЗМЕР: 1484 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/07/2025 23:03:57
+================================================================================
+
+
+class NFT3DViewer {
+    constructor(containerId, modelUrl) {
+        this.container = document.getElementById(containerId);
+        this.modelUrl = modelUrl;
+        this.init();
+    }
+
+    init() {
+        // Инициализация Three.js сцены
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.container.appendChild(this.renderer.domElement);
+
+        // Загрузка модели
+        const loader = new THREE.GLTFLoader();
+        loader.load(this.modelUrl, (gltf) => {
+            this.model = gltf.scene;
+            this.scene.add(this.model);
+            this.animate();
+        });
+
+        // Настройка освещения и камеры
+        const light = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(light);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(0, 1, 1);
+        this.scene.add(directionalLight);
+        this.camera.position.z = 5;
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        if (this.model) this.model.rotation.y += 0.01;
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
+
+================================================================================
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\static\js\script.js
+РАЗМЕР: 1546 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:44:59
+================================================================================
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Анимация карточек NFT
+    const nftCards = document.querySelectorAll('.nft-card');
+    nftCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        });
+    });
+
+    // Подтверждение удаления
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Вы уверены, что хотите удалить этот NFT?')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Превью загружаемого изображения
+    const imageUpload = document.getElementById('image-upload');
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('image-preview').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+
+
+================================================================================
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\auth\login.html
+РАЗМЕР: 1337 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:45:12
 ================================================================================
 
 
@@ -157,7 +356,9 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\auth\register.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\auth\register.html
+РАЗМЕР: 2019 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:45:26
 ================================================================================
 
 
@@ -204,7 +405,86 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\dashboard\dashboard.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\dashboard\create_nft.html
+РАЗМЕР: 3591 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/07/2025 23:21:00
+================================================================================
+
+
+{% extends "layouts/base.html" %}
+
+{% block title %}Создать NFT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Создать новое достижение (NFT)</h2>
+                <form method="POST" action="{{ url_for('create_nft') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rarity" class="form-label">Редкость</label>
+                        <select class="form-select" id="rarity" name="rarity" required>
+                            <option value="common">Обычная</option>
+                            <option value="rare">Редкая</option>
+                            <option value="legendary">Легендарная</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="owner_id" class="form-label">Назначить ученику</label>
+                        <select class="form-select" id="owner_id" name="owner_id">
+                            <option value="">-- Не назначать --</option>
+                            {% for student in students %}
+                            <option value="{{ student.id }}">{{ student.username }} ({{ student.class_grade }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="media" class="form-label">3D-модель или изображение</label>
+                        <input type="file" class="form-control" id="media" name="media" accept="image/*,.glb,.gltf,.obj">
+                        <small class="text-muted">Поддерживаются: GLB, GLTF, OBJ (3D) или JPG/PNG (2D)</small>
+                        <div id="preview-container" style="width: 100%; height: 300px; display: none;"></div>
+                        <img id="image-preview" src="#" style="max-height: 200px; display: none;">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Создать NFT</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Превью загружаемого изображения
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('image-preview');
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
+
+
+================================================================================
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\dashboard\dashboard.html
+РАЗМЕР: 3186 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:45:41
 ================================================================================
 
 
@@ -279,7 +559,9 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\dashboard\index.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\dashboard\index.html
+РАЗМЕР: 747 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:33:08
 ================================================================================
 
 
@@ -307,14 +589,9 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html
-================================================================================
-
-
-
-
-================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html\base.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\layouts\base.html
+РАЗМЕР: 1667 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/07/2025 23:03:31
 ================================================================================
 
 
@@ -327,6 +604,8 @@ else:
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -355,7 +634,9 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\templates\layouts.html\navbar.html
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\templates\layouts\navbar.html
+РАЗМЕР: 2344 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/05/2025 19:44:23
 ================================================================================
 
 
@@ -409,7 +690,9 @@ else:
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\app.py
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\app.py
+РАЗМЕР: 7352 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/07/2025 23:01:39
 ================================================================================
 
 
@@ -540,19 +823,26 @@ def create_nft():
         description = request.form['description']
         rarity = request.form['rarity']
         owner_id = request.form['owner_id']
+
+
         
-        # Обработка загрузки изображения
-        if 'image' in request.files:
-            image = request.files['image']
-            if image.filename != '':
-                filename = f"{datetime.now().timestamp()}.{image.filename.split('.')[-1]}"
-                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                image_url = f"uploads/{filename}"
+        if 'media' in request.files:  # Переименуйте поле с 'image' на 'media'
+            media_file = request.files['media']
+            if media_file.filename != '':
+                # Определяем тип файла
+                file_ext = media_file.filename.split('.')[-1].lower()
+                media_type = '3d_model' if file_ext in ['glb', 'gltf', 'obj'] else 'image'
+                
+                # Сохраняем файл
+                filename = f"{datetime.now().timestamp()}.{file_ext}"
+                media_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                media_url = f"uploads/{filename}"
                 
                 new_nft = NFT(
                     title=title,
                     description=description,
-                    image_url=image_url,
+                    media_url=media_url,
+                    media_type=media_type,  # Добавляем тип медиа
                     rarity=rarity,
                     owner_id=owner_id
                 )
@@ -597,12 +887,19 @@ def ratings():
                          top_users=top_users,
                          top_classes=top_classes)
 
+
+@app.route('/')
+def home():
+    return redirect(url_for('login'))
+
 if __name__ == '__main__':
     app.run(debug=True)
 
 
 ================================================================================
-Файл: C:\Users\yatma\Desktop\NFT\models.py
+ФАЙЛ: C:\Users\yatma\Desktop\NFT\models.py
+РАЗМЕР: 1051 bytes
+ДАТА ИЗМЕНЕНИЯ: 04/07/2025 23:00:30
 ================================================================================
 
 
@@ -621,9 +918,10 @@ class User(db.Model):
 
 class NFT(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    description = db.Column(db.Text)
-    image_url = db.Column(db.String(200))
-    rarity = db.Column(db.String(20))  # "common", "rare", "legendary"
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    date_created = db.Column(db.DateTime)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    media_url = db.Column(db.String(200), nullable=False)  
+    media_type = db.Column(db.String(20), nullable=False)  # 'image', '3d_model'
+    rarity = db.Column(db.String(20), nullable=False, default='common')
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
